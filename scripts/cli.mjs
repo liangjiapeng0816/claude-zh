@@ -76,14 +76,11 @@ function checkVersion({ version, build }) {
     return;
   }
 
-  console.error(`版本不匹配。本机桌面版本 ${version}，构建号 ${build}。`);
-  console.error(`当前安装脚本适配桌面版本 ${baseline.version}，构建号 ${baseline.build}。`);
-  console.error(`请在 ${releasesUrl} 选择注明桌面版本 ${version}、构建号 ${build} 的 Release。`);
-  if (version !== baseline.version) {
-    console.error(`如果列表中有 v${version}，请核对该发行版注明的构建号。`);
-  }
-  console.error('没有匹配的 Release 时，可以继续使用官方版。继续构建仍须通过应用资源校验。');
-  process.exitCode = 2;
+  console.warn(`版本提示。本机桌面版本 ${version}，构建号 ${build}。`);
+  console.warn(`当前适配基准为桌面版本 ${baseline.version}，构建号 ${baseline.build}。`);
+  console.warn('本地构建可继续。词条缺少适用的中文译文时会显示原文。');
+  console.warn(`下载 DMG 时，优先在 ${releasesUrl} 选择版本和构建号都匹配的 Release。`);
+  console.warn(`没有匹配项时，使用最新 Release ${releasesUrl}/latest`);
 }
 
 function readSourceArchives(path, plist) {

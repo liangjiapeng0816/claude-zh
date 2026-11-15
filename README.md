@@ -11,19 +11,17 @@ plutil -extract CFBundleShortVersionString raw -o - /Applications/Claude.app/Con
 plutil -extract CFBundleVersion raw -o - /Applications/Claude.app/Contents/Info.plist
 ```
 
-在 [GitHub Releases](https://github.com/liangjiapeng0816/claude-zh/releases) 里选择**桌面版本和构建号都相同**的安装包。中文版和原版共用本机数据目录，官方版升级后应重新核对这两个值。
+在 [GitHub Releases](https://github.com/liangjiapeng0816/claude-zh/releases) 里，优先选择桌面版本和构建号都匹配的安装包。**没有匹配版本时，直接使用[最新 Release](https://github.com/liangjiapeng0816/claude-zh/releases/latest) 的 DMG。** 版本和构建号用于选择适配，存在差异时也可以继续安装。缺少适用中文译文的字段会显示原文。
 
 | 官方桌面版本 | 官方构建号 | 对应适配版本 | 实测平台 |
 | --- | --- | --- | --- |
-| 5.11492.5 | 5.11492.5 | [v5.11492.5](https://github.com/liangjiapeng0816/claude-zh/releases/tag/v5.11492.5) | macOS Apple Silicon（arm64） |
-
-如果找不到同时匹配两项的 Release，先使用当前官方版，等对应适配发布。自行构建前，运行 `npm run inspect`，把版本、构建号和 ASAR 头部指纹与[资源基准](translations/baseline.json)核对。构建提示必需资源的结构或指纹不符时，等该构建号完成适配后再安装。
+| 5.11492.5 | 5.11492.5 | [v5.11492.5-r1](https://github.com/liangjiapeng0816/claude-zh/releases/tag/v5.11492.5-r1) | macOS Apple Silicon（arm64） |
 
 ## 安装和使用
 
-下载匹配的 DMG 后，将里面的应用拖入「应用程序」。退出原版后，打开「Claude 中文版」。
+下载选定的 DMG 后，将里面的应用拖入「应用程序」。退出原版后，打开「Claude 中文版」。
 
-从源码安装时，在 Finder 双击 `Install.command`。脚本会自动核对本机官方 Claude Desktop 的版本和构建号。如果有任一项不匹配，脚本会提示应查找的 Release。按回车取消，输入 `y` 可以继续构建和安装，构建仍会校验应用资源。
+从源码安装时，在 Finder 双击 `Install.command`。脚本会核对本机官方 Claude Desktop 的版本和构建号，发现差异时提示 Release 选择方法，然后继续尝试构建。如果本机应用资源的结构与构建脚本不兼容，可改用最新 Release 已构建的 DMG。
 
 两个版本共用本机原有的 Claude 数据目录，请一次只运行一个。macOS 首次启动或重新签名后可能要求授权「Claude Safe Storage」，按系统提示处理。对于需要 Anthropic 签名身份、浏览器回调或系统权限的功能，可切回原版。安装包只包含软件资源。
 
@@ -40,7 +38,7 @@ npm run install:app -- 5.11492.5
 npm run dmg -- 5.11492.5
 ```
 
-`inspect` 和 `build` 可以通过 `-- "/其他路径/Claude.app"` 指定官方应用。产物和 `build-report.json` 按实际桌面版本写入 `release/<桌面版本>/`。中文版的「检查更新」会打开重新构建说明。更新官方版后再次运行 `inspect` 和 `build`。若必需脚本的结构或指纹改变，构建会停止并保留已有产物。新版本适配时，先从本机新 ASAR 核对补丁位置和内嵌摘要，再更新 `scripts/patches.mjs` 和 `translations/baseline.json`。
+`inspect` 和 `build` 可以通过 `-- "/其他路径/Claude.app"` 指定官方应用。产物和 `build-report.json` 按实际桌面版本写入 `release/<桌面版本>/`。中文版的「检查更新」会打开重新构建说明。更新官方版后，可以运行 `npm run inspect`，将 ASAR 头部指纹与[资源基准](translations/baseline.json)比较。若必需脚本的结构或指纹改变，构建会停止并保留已有产物。新版本适配时，先从本机新 ASAR 核对补丁位置和内嵌摘要，再更新 `scripts/patches.mjs` 和 `translations/baseline.json`。
 
 ## 语言资源与范围
 
