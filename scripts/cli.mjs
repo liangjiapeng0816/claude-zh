@@ -8,8 +8,6 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Asar } from './asar.mjs';
-import { mergeCatalog, readTuples } from './catalogs.mjs';
-import { patches } from './patches.mjs';
 import { updateEmbeddedDigest, verifyEmbeddedDigest } from './integrity.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -18,6 +16,8 @@ const appName = 'Claude 中文版';
 const appFile = appName + '.app';
 const bundleId = 'local.claude.desktop.zh-hans';
 const officialId = 'com.anthropic.claudefordesktop';
+const officialApp = '/Applications/Claude.app';
+const releasesUrl = 'https://github.com/liangjiapeng0816/claude-zh/releases';
 const archives = ['app', 'ion-dist'];
 const release = join(root, 'release');
 const receiptFile = 'build-report.json';
@@ -52,6 +52,9 @@ function verifyASAR(archive, plist, name) {
 }
 
 function sourceInfo(path) {
+  if (!existsSync(join(path, 'Contents/Info.plist'))) {
+    throw new Error(`找不到官方 Claude Desktop ${path}`);
+  }
   path = realpathSync(path);
   const plist = readBundle(path);
   if (plist.CFBundleIdentifier !== officialId || plist.CFBundleExecutable !== 'Claude') {
@@ -59,10 +62,28 @@ function sourceInfo(path) {
   }
   const rawVersion = plist.CFBundleShortVersionString;
   if (!/^\d+(?:\.\d+){2,3}$/.test(rawVersion)) throw new Error('无法识别桌面版本');
+  const rawBuild = plist.CFBundleVersion;
+  if (typeof rawBuild !== 'string' || !rawBuild.trim()) throw new Error('无法识别构建号');
   const macho = run('/usr/bin/file', ['-b', join(path, 'Contents/MacOS/Claude')]);
   const architectures = ['arm64', 'x86_64'].filter(architecture => macho.includes(architecture));
   if (!architectures.includes(process.arch)) throw new Error('官方应用缺少当前 Node 架构的可执行文件');
-  return { path, plist, version: rawVersion, build: plist.CFBundleVersion, architectures };
+  return { path, plist, version: rawVersion, build: rawBuild, architectures };
+}
+
+function checkVersion({ version, build }) {
+  if (version === baseline.version && build === baseline.build) {
+    console.log(`版本核对通过。桌面版本 ${version}，构建号 ${build}。`);
+    return;
+  }
+
+  console.error(`版本不匹配。本机桌面版本 ${version}，构建号 ${build}。`);
+  console.error(`当前安装脚本适配桌面版本 ${baseline.version}，构建号 ${baseline.build}。`);
+  console.error(`请在 ${releasesUrl} 选择注明桌面版本 ${version}、构建号 ${build} 的 Release。`);
+  if (version !== baseline.version) {
+    console.error(`如果列表中有 v${version}，请核对该发行版注明的构建号。`);
+  }
+  console.error('没有匹配的 Release 时，可以继续使用官方版。继续构建仍须通过应用资源校验。');
+  process.exitCode = 2;
 }
 
 function readSourceArchives(path, plist) {
@@ -111,8 +132,8 @@ function sign(app, stripVendorEntitlements = false) {
   }
 }
 
-function customizePlist(plist) {
-  const zhPermissions = new Map(readTuples('permissions').map(([id, en, zh]) => [id, { en, zh }]));
+function customizePlist(plist, permissions) {
+  const zhPermissions = new Map(permissions.map(([id, en, zh]) => [id, { en, zh }]));
   let translated = 0;
   const skipped = [];
   for (const [id, { en, zh }] of zhPermissions) {
@@ -216,6 +237,8 @@ function takeLock(path) {
 }
 
 async function build(source, opened) {
+  const { mergeCatalog, readTuples } = await import('./catalogs.mjs');
+  const { patches } = await import('./patches.mjs');
   const state = snapshot(source, opened);
   const { appChanges, webChanges, report } = patches(...opened, baseline);
   run('/usr/bin/codesign', ['--verify', '--deep', '--strict', source.path]);
@@ -232,7 +255,9 @@ async function build(source, opened) {
     copy(source.path, app);
     const plistPath = join(app, 'Contents/Info.plist');
     const plist = readPlist(plistPath);
-    if (plist.CFBundleVersion !== source.build) throw new Error('拷贝时官方应用已更新，请重新构建');
+    if (plist.CFBundleShortVersionString !== source.version || plist.CFBundleVersion !== source.build) {
+      throw new Error('拷贝时官方应用已更新，请重新构建');
+    }
     const originalIntegrity = structuredClone(plist.ElectronAsarIntegrity);
     const output = {};
     for (const [index, replacements] of [appChanges, webChanges].entries()) {
@@ -248,7 +273,7 @@ async function build(source, opened) {
         archive.close();
       }
     }
-    report.permissions = customizePlist(plist);
+    report.permissions = customizePlist(plist, readTuples('permissions'));
     writePlist(plistPath, plist);
 
     const localized = join(app, 'Contents/Resources/zh_CN.lproj');
@@ -336,11 +361,13 @@ try {
     throw new Error('请使用 macOS 和 Node.js 22 或更新版本');
   }
   const [command, rawArg, ...rest] = process.argv.slice(2);
-  if (rest.length || !['inspect', 'build', 'verify', 'install', 'dmg'].includes(command)) {
-    throw new Error('用法 npm run inspect|build -- [官方应用路径] 或 npm run verify|install:app|dmg -- [桌面版本]');
+  if (rest.length || !['check-version', 'inspect', 'build', 'verify', 'install', 'dmg'].includes(command)) {
+    throw new Error('用法 npm run check-version|inspect|build -- [官方应用路径] 或 npm run verify|install:app|dmg -- [桌面版本]');
   }
-  if (command === 'inspect' || command === 'build') {
-    const source = sourceInfo(resolve(rawArg ?? '/Applications/Claude.app'));
+  if (command === 'check-version') {
+    checkVersion(sourceInfo(resolve(rawArg ?? officialApp)));
+  } else if (command === 'inspect' || command === 'build') {
+    const source = sourceInfo(resolve(rawArg ?? officialApp));
     const opened = readSourceArchives(source.path, source.plist);
     try {
       if (command === 'inspect') console.log(JSON.stringify(snapshot(source, opened), null, 2));
@@ -349,7 +376,7 @@ try {
       for (const archive of opened) archive.close();
     }
   } else {
-    const version = rawArg ?? sourceInfo('/Applications/Claude.app').version;
+    const version = rawArg ?? sourceInfo(officialApp).version;
     if (!/^\d+(?:\.\d+){2,3}$/.test(version)) throw new Error('无效的桌面版本号');
     const versionDir = join(release, version);
     const receipt = JSON.parse(readFileSync(join(versionDir, receiptFile)));

@@ -21,7 +21,9 @@ plutil -extract CFBundleVersion raw -o - /Applications/Claude.app/Contents/Info.
 
 ## 安装和使用
 
-下载匹配的 DMG 后，将里面的应用拖入「应用程序」。从源码安装时，在 Finder 双击 `Install.command`。退出原版后，打开「Claude 中文版」。
+下载匹配的 DMG 后，将里面的应用拖入「应用程序」。退出原版后，打开「Claude 中文版」。
+
+从源码安装时，在 Finder 双击 `Install.command`。脚本会自动核对本机官方 Claude Desktop 的版本和构建号。如果有任一项不匹配，脚本会提示应查找的 Release。按回车取消，输入 `y` 可以继续构建和安装，构建仍会校验应用资源。
 
 两个版本共用本机原有的 Claude 数据目录，请一次只运行一个。macOS 首次启动或重新签名后可能要求授权「Claude Safe Storage」，按系统提示处理。对于需要 Anthropic 签名身份、浏览器回调或系统权限的功能，可切回原版。安装包只包含软件资源。
 
