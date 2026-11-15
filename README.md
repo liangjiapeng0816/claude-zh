@@ -47,5 +47,6 @@ npm run dmg -- 5.11492.5
 - `app.asar` 管理桌面菜单、窗口和原生提示。补译以官方简体词库为基础。
 - `ion-dist.asar` 管理本机网关模式下内置的会话、Code、Cowork 和设置界面。新增 `zh-Hans` 词库及动态词库。
 - `translations/*.jsonl` 中每行保存词条 ID、完整原文和中文。原文变更或词条删除时跳过旧译文。保留原版自带的中文译文，其余回退到当前英文。格式化文案核对 ICU 变量、格式、分支和标签。少量授权窗口文案按文件指纹和完整片段核对。
+- `translations/web-reference.jsonl` 收录从 [javaht/claude-desktop-zh-cn](https://github.com/javaht/claude-desktop-zh-cn/tree/25afa23cd37d32ec4f95a640213c2bb19fa4fa8d) 筛选的补译。导入时核对原文或由原文派生的 ID，并检查链接、代码和 ICU 结构。构建使用仓库内的词库，应用内附有 [MIT 许可声明](translations/THIRD_PARTY_NOTICES.txt)。
 - 构建重算 ASAR 头部、修改条目的内容摘要和 Electron 二进制里的内嵌摘要。副本使用独立 Bundle ID，外层应用、Electron Framework 和对应 Helper 采用本地 ad-hoc 签名。这些重签组件使用 ad-hoc 运行属性，ASAR 运行时会继续校验应用资源。参考 [Electron ASAR 完整性文档](https://www.electronjs.org/docs/latest/tutorial/asar-integrity) 和 [macOS 内嵌摘要实现](https://github.com/electron/electron/blob/main/shell/common/asar/integrity_digest.mm)。
 - 本机验证覆盖的页面和剩余限制见 [验收记录](验证记录.md)。在线服务下发的网页、实验功能和低频页面可能仍显示原文。

@@ -67,7 +67,8 @@ export function patches(app, ion, baseline) {
     ['dynamic', ion, webChanges, 'i18n/dynamic/', readCatalog(ion, 'i18n/dynamic/en-US.json'),
       readCatalog(ion, 'i18n/dynamic/zh-Hans.json', true), {}]
   ]) {
-    const { localized, report: stats } = mergeCatalog(label, english, official, reuse);
+    const additionalCatalogs = label === 'web' ? ['web-reference'] : [];
+    const { localized, report: stats } = mergeCatalog(label, english, official, reuse, ...additionalCatalogs);
     put(map, folder + locale + '.json', JSON.stringify(localized));
     report[label] = stats;
   }

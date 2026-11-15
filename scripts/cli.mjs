@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
-  closeSync, createReadStream, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync,
+  closeSync, copyFileSync, createReadStream, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync,
   readdirSync, realpathSync, renameSync, rmSync, symlinkSync, writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -282,6 +282,8 @@ async function build(source, opened) {
     writePlist(canonical, merged.localized);
     report.macOS = merged.report;
     writePlist(join(localized, 'InfoPlist.strings'), { CFBundleDisplayName: appName });
+    copyFileSync(join(root, 'translations/THIRD_PARTY_NOTICES.txt'),
+      join(app, 'Contents/Resources/claude-zh-translation-notices.txt'));
     // Official provisioning and notarization tickets authenticate the vendor's unmodified bundle.
     for (const file of ['embedded.provisionprofile', 'CodeResources']) {
       rmSync(join(app, 'Contents', file), { force: true });

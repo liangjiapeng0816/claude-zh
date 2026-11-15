@@ -25,7 +25,7 @@ export function checkMessage(source, translation) {
   if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error('ICU 参数、分支或标记不一致');
 }
 
-export function mergeCatalog(label, english, official = {}, secondary = {}) {
+export function mergeCatalog(label, english, official = {}, secondary = {}, ...additionalCatalogs) {
   const localized = { ...english };
   const report = { entries: Object.keys(english).length, official: 0, supplemental: 0, english: 0, skipped: [] };
   for (const [id, original] of Object.entries(english)) {
@@ -36,7 +36,7 @@ export function mergeCatalog(label, english, official = {}, secondary = {}) {
     }
   }
   const seen = new Set();
-  for (const [id, source, translation] of readTuples(label)) {
+  for (const [id, source, translation] of [label, ...additionalCatalogs].flatMap(readTuples)) {
     if (seen.has(id)) throw new Error(`${label}: 重复词条 ${id}`);
     seen.add(id);
     if (english[id] !== source) {
