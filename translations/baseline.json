@@ -1,0 +1,26 @@
+{
+  "version": "5.11492.5",
+  "build": "5.11492.5",
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "archives": {
+    "app": {
+      "headerSha256": "dc2fa2aeb1ac5c731706f5aec972d3888431aae787d798e5a929e1cf5bb005cf",
+      "files": {
+        ".vite/build/index.pre.js": "9fb3aabdda6e147315ec80ef6cef079d9217db18ea8a5512c8a27632e1b471b5",
+        ".vite/build/index.chunk-xV3fJhc7.js": "6b4474d1c0e0c0f0a6dc0c92c0205994b2e91d2073b457a28db3cbe199b45c95",
+        ".vite/renderer/local_exec_consent/localExecConsent.html": "481a26edd6bd0fdd8d0d17fe098762bda8b119b4925a1994c7531f4360f1cad1",
+        ".vite/renderer/local_exec_consent/assets/main-DJutgflC.js": "086e9996841fbacf3f554d177cc5dac10e6a39c9286850c04f962f948feb7970"
+      }
+    },
+    "ion-dist": {
+      "headerSha256": "8a451b76dd927371ab9cb49f6e2a3acafcc3f84d6e43becb7474b26d5889732a",
+      "files": {
+        "index.html": "0ca8208b4eac0cbb66e04ab5578f02eb1e1bf7825127388eeb0cb33b560409b9",
+        "assets/v1/shared-130-B8XvJbHi.js": "73fc2111340f4669b2beffb080d3f8dfd142413747f37f9cd5d34b5632dbf1ff"
+      }
+    }
+  }
+}

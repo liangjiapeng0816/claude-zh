@@ -1,0 +1,19 @@
+{
+  "name": "claude-desktop-zh-local",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "inspect": "node scripts/cli.mjs inspect",
+    "build": "node scripts/cli.mjs build",
+    "verify": "node scripts/cli.mjs verify",
+    "install:app": "node scripts/cli.mjs install",
+    "dmg": "node scripts/cli.mjs dmg"
+  },
+  "dependencies": {
+    "@formatjs/icu-messageformat-parser": "2.11.4"
+  }
+}
