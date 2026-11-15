@@ -1,5 +1,7 @@
 # Claude Desktop 简体中文版
 
+**[下载 macOS 安装包（DMG）](https://github.com/liangjiapeng0816/claude-zh/releases/download/v5.11492.5-r1/Claude-zh-Hans-5.11492.5.dmg)** · [查看最新 Release](https://github.com/liangjiapeng0816/claude-zh/releases/latest)
+
 基于本机的官方 `Claude.app` 构建。本次适配桌面版本及构建号 **5.11492.5**。原版是 arm64 / x86_64 通用应用，实际在这台 arm64 Mac 上验收。
 
 ## 选择适配版本
