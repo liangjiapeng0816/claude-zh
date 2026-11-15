@@ -2,9 +2,26 @@
 
 基于本机的官方 `Claude.app` 构建。本次适配桌面版本及构建号 **5.11492.5**。原版是 arm64 / x86_64 通用应用，实际在这台 arm64 Mac 上验收。
 
+## 选择适配版本
+
+以当前安装的官方 Claude Desktop 为准。「Claude」菜单中的「关于 Claude」可以查看桌面版本。要同时确认版本和构建号，在终端运行以下两行，输出依次是桌面版本和构建号。官方应用装在其他位置时，把命令中的路径换成实际路径。
+
+```sh
+plutil -extract CFBundleShortVersionString raw -o - /Applications/Claude.app/Contents/Info.plist
+plutil -extract CFBundleVersion raw -o - /Applications/Claude.app/Contents/Info.plist
+```
+
+在 [GitHub Releases](https://github.com/liangjiapeng0816/claude-zh/releases) 里选择**桌面版本和构建号都相同**的安装包。中文版和原版共用本机数据目录，官方版升级后应重新核对这两个值。
+
+| 官方桌面版本 | 官方构建号 | 对应适配版本 | 实测平台 |
+| --- | --- | --- | --- |
+| 5.11492.5 | 5.11492.5 | [v5.11492.5](https://github.com/liangjiapeng0816/claude-zh/releases/tag/v5.11492.5) | macOS Apple Silicon（arm64） |
+
+如果找不到同时匹配两项的 Release，先使用当前官方版，等对应适配发布。自行构建前，运行 `npm run inspect`，把版本、构建号和 ASAR 头部指纹与[资源基准](translations/baseline.json)核对。构建提示必需资源的结构或指纹不符时，等该构建号完成适配后再安装。
+
 ## 安装和使用
 
-在 Finder 双击 `Install.command`，或将 `release/5.11492.5/Claude-zh-Hans-5.11492.5.dmg` 里的应用拖入「应用程序」。退出原版后，打开「Claude 中文版」。
+下载匹配的 DMG 后，将里面的应用拖入「应用程序」。从源码安装时，在 Finder 双击 `Install.command`。退出原版后，打开「Claude 中文版」。
 
 两个版本共用本机原有的 Claude 数据目录，请一次只运行一个。macOS 首次启动或重新签名后可能要求授权「Claude Safe Storage」，按系统提示处理。对于需要 Anthropic 签名身份、浏览器回调或系统权限的功能，可切回原版。安装包只包含软件资源。
 
